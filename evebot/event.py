@@ -44,7 +44,7 @@ class Event:
     @staticmethod
     def create(client, data):
         if data['type'] == Event.TYPE_MESSAGE:
-            return Message(client, data)
+            return Message.create(client, data)
 
         return Event(client, data)
 
@@ -63,9 +63,6 @@ class Event:
     def is_user_typing(self):
         return self.type == Event.TYPE_USER_TYPING
 
-    def is_plain_message(self):
-        return self.is_message() and self.text and not 'subtype' in self.data
-
 
 class Message(Event):
     SUBTYPE_ME_MESSAGE = 'me_message'
@@ -82,9 +79,6 @@ class Message(Event):
     def __init__(self, client, data):
         Event.__init__(self, client, data)
 
-        if self.is_plain_message():
-            self.channel.store_message(self)
-
         self.mentions = {}
 
         if 'text' in self.data:
@@ -92,6 +86,17 @@ class Message(Event):
 
             for user_id, name, text in matches:
                 self.mentions[user_id] = {'user': self._client.get_user(user_id), 'text': text}
+
+    @staticmethod
+    def create(client, data):
+        if 'subtype' in data:
+            if data['subtype'] == Message.SUBTYPE_MESSAGE_DELETED:
+                return MessageDeleted(client, data)
+
+            if data['subtype'] == Message.SUBTYPE_MESSAGE_CHANGED:
+                return MessageChanged(client, data)
+
+        return Message(client, data)
 
     def am_i_mentioned(self):
         return self.is_mentioned(self._client.get_me())
@@ -102,3 +107,24 @@ class Message(Event):
     def is_me_message(self):
         return self.data['subtype'] == Message.SUBTYPE_ME_MESSAGE
 
+    def is_plain(self):
+        return not 'subtype' in self.data
+
+
+class MessageDeleted(Message):
+    def __init__(self, client, data):
+        Message.__init__(self, client, data)
+        self.original = self.channel.find_message(self.deleted_ts)
+
+class MessageChanged(Message):
+    def __init__(self, client, data):
+        Message.__init__(self, client, data)
+
+        self.new = Message.create(client, {
+            'text': data['message']['text'],
+            'channel': self.channel,
+            'user': self._client.get_user(data['message']['user']),
+            'ts': data['message']['edited']['ts'],
+        })
+
+        self.old = self.channel.find_message(data['message']['ts'])

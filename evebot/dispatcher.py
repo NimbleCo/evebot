@@ -2,6 +2,7 @@ import importlib
 import logging
 
 from evebot.settings import config
+from evebot.event import Message, Event
 from enum import Enum
 
 class SubscriberType(Enum):
@@ -9,6 +10,8 @@ class SubscriberType(Enum):
     text = 2                # plain text message events
     text_mentioned = 3      # plain text messages where bot is mentioned
     text_direct = 4         # plain text messages in direct channel with bot
+    msg_deleted = 5         # message was deleted
+    msg_changed = 6         # message was changed
 
 class Dispatcher:
     def __init__(self, client):
@@ -55,14 +58,22 @@ class Dispatcher:
     def dispatch(self, event):
         plugins = self.filter_plugins(SubscriberType.all)
 
-        if event.is_plain_message():
-            plugins |= self.filter_plugins(SubscriberType.text)
+        if event.is_message():
+            if event.subtype:
+                if event.subtype == Message.SUBTYPE_MESSAGE_DELETED:
+                    plugins |= self.filter_plugins(SubscriberType.msg_deleted)
 
-            if event.channel and event.channel.is_direct:
-                plugins |= self.filter_plugins(SubscriberType.text_direct)
+                if event.subtype == Message.SUBTYPE_MESSAGE_CHANGED:
+                    plugins |= self.filter_plugins(SubscriberType.msg_changed)
 
-            if event.am_i_mentioned():
-                plugins |= self.filter_plugins(SubscriberType.text_mentioned)
+            if event.is_plain():
+                plugins |= self.filter_plugins(SubscriberType.text)
+
+                if event.channel and event.channel.is_direct:
+                    plugins |= self.filter_plugins(SubscriberType.text_direct)
+
+                if event.am_i_mentioned():
+                    plugins |= self.filter_plugins(SubscriberType.text_mentioned)
 
         if event.channel and not event.channel.is_naughty:
             plugins = filter(lambda plugin: not plugin.IS_NAUGHTY, plugins)

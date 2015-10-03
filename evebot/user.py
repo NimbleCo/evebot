@@ -16,6 +16,12 @@ class User:
 
         return self.name
 
+    def get_full_name(self):
+        if self.last_name and self.first_name:
+            return self.first_name + ' ' + self.last_name
+
+        return self.name
+
     def __eq__(self, other):
         return isinstance(other, User) and self.id == other.id
 

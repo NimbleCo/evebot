@@ -9,22 +9,15 @@ class MessageBuffer:
         self._size = config.get('core.channel_message_buffer_size')
 
     def store(self, msg):
-        if not msg.user in self._messages:
-            self._messages[msg.user] = {}
-
-        self._messages[msg.user][msg.ts] = msg
-        self._timestamps.append((msg.ts, msg.user))
+        self._messages[msg.ts] = msg
+        self._timestamps.append(msg.ts)
 
         if len(self._timestamps) > self._size:
-            ts, user = self._timestamps.popleft()
-            del self._messages[user][ts]
+            del self._messages[self._timestamps.popleft()]
 
-        print (self._timestamps)
-
-    def find(self, ts, user):
-        if user in self._messages:
-            if ts in self._messages[user]:
-                return self._messages[user][ts]
+    def find(self, ts):
+        if ts in self._messages:
+            return self._messages[ts]
 
         return None
 
@@ -68,8 +61,8 @@ class Channel:
     def store_message(self, msg):
         self.messages.store(msg)
 
-    def find_message(self, ts, user):
-        return self.messages.find(ts, user)
+    def find_message(self, ts):
+        return self.messages.find(ts)
 
     @staticmethod
     def get_channel_type(id):

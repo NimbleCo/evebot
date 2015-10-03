@@ -2,6 +2,7 @@ import re
 import random
 
 from evebot.plugin import Plugin
+from evebot.dispatcher import SubscriberType
 
 class HelloPlugin(Plugin):
     NAME = 'Hello'
@@ -13,22 +14,18 @@ class HelloPlugin(Plugin):
         '`@{me} good morning`',
     ]
 
+    SUBSCRIBES_TO = {SubscriberType.text_direct, SubscriberType.text_mentioned}
+
     hello_re = re.compile(r'hello|what\'?s\s+(up|cookin)|howdy|good\s*morning|hey', re.IGNORECASE)
     answers = [
         '<@{user_id}> Hello {first_name}!',
         'Looking good today, <@{user_id}>!',
         'What\'s up, {first_name}?',
         'How can I help you today?',
-        'Ahh, Mr {first_name} {last_name}! How nice it is to see you.'
+        'Ahh, Mr {full_name}}! How nice it is to see you.'
     ]
 
     def on_event(self, event):
-        if not event.is_plain_message():
-            return
-
-        if not event.am_i_mentioned() and not event.channel.is_direct:
-            return
-
         if not HelloPlugin.hello_re.search(event.text):
             return
 
@@ -37,6 +34,6 @@ class HelloPlugin(Plugin):
     def create_response(self, event):
         return random.choice(HelloPlugin.answers).format(
             user_id = event.user.id,
-            first_name = event.user.first_name,
-            last_name = event.user.last_name
+            first_name = event.user.get_first_name(),
+            full_name = event.user.get_full_name()
         )

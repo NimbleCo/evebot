@@ -143,6 +143,10 @@ class Client:
 
             self.process_special_event(event)
 
+            # store messages in the channel buffer
+            if isinstance(event, Message) and event.is_plain():
+                event.channel.store_message(event)
+
             self._logger.debug('Event parsed:\n' + str(event))
 
             events.append(event)

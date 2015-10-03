@@ -1,12 +1,8 @@
-- mock user for editing his message
-- mock user for typing too long
-- respond to hellos
-- say fortunes
 - today at bal
-- repost deleted messages for da luulz
 - swear counter
 
-- Create factory for events, channels, users or use __new__
+- react to edits
+
 - general text/response stuff
 - soundcloud
 - diagnostics (uname, ...)

@@ -15,7 +15,7 @@ class CommandsPlugin(Plugin):
     def __init__(self, client, plugins):
         Plugin.__init__(self, client, plugins)
 
-        self.command_re = re.compile(r'^<@' + self._me.id + '>\s+!(\w+)$')
+        self.command_re = re.compile(r'^<@' + self._me.id + '>\s+!(?P<command>\w+)$')
 
     def on_event(self, event):
         match = self.command_re.match(event.text.strip())
@@ -23,7 +23,7 @@ class CommandsPlugin(Plugin):
         if not match:
             return
 
-        command = match.groups(1)[0].strip()
+        command = match.group('command').strip()
 
         if command == 'help':
             help_texts = self._plugins.get_help_text(event.channel.is_naughty)

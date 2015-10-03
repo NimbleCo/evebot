@@ -120,11 +120,14 @@ class MessageChanged(Message):
     def __init__(self, client, data):
         Message.__init__(self, client, data)
 
+        # if not is edited then this was some kind of automated event (attachments)
+        self.is_edited = 'edited' in data['message']
+
         self.new = Message.create(client, {
             'text': data['message']['text'],
             'channel': self.channel,
             'user': self._client.get_user(data['message']['user']),
-            'ts': data['message']['edited']['ts'],
+            'ts': data['message']['edited']['ts'] if self.is_edited else data['message']['ts']
         })
 
         self.old = self.channel.find_message(data['message']['ts'])

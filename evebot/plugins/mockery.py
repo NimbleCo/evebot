@@ -5,7 +5,7 @@ import random
 from evebot.dispatcher import SubscriberType
 from evebot.plugin import Plugin
 
-class MockDelete(Plugin):
+class MockDeletePlugin(Plugin):
     NAME = 'Mock delete'
     HELP = 'Mocks users that delete their msgs.'
     IS_NAUGHTY = True
@@ -38,7 +38,7 @@ class MockDelete(Plugin):
             full_name=event.original.user.get_full_name()
         ))
 
-class MockChange(Plugin):
+class MockChangePlugin(Plugin):
     NAME = 'Mock change'
     HELP = 'Mocks users that edit their messages.'
     IS_NAUGHTY = True
@@ -56,8 +56,7 @@ class MockChange(Plugin):
     ]
 
     def on_event(self, event):
-        if not event.old:
-            # buffer was not long enough
+        if not event.old or not event.is_edited:
             return
 
         if random.randrange(1, self.probability) > 1:

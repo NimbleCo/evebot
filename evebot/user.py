@@ -19,6 +19,9 @@ class User:
     def __eq__(self, other):
         return isinstance(other, User) and self.id == other.id
 
+    def __hash__(self):
+        return hash(self.id)
+
     def __getattr__(self, name):
         if not name in self.data:
             return None

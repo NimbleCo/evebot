@@ -24,7 +24,7 @@ class Event:
             self.data['user'] = self._client.get_user(self.data['user'])
 
         if 'ts' in self.data:
-            self.data['ts'] = datetime.fromtimestamp(int(float(self.data['ts'])))
+            self.time = datetime.fromtimestamp(int(float(self.data['ts'])))
 
     def __getattr__(self, name):
         if not name in self.data:
@@ -40,6 +40,13 @@ class Event:
                 s += '\n    %s: %s' % (k, v)
 
         return s
+
+    @staticmethod
+    def create(client, data):
+        if data['type'] == Event.TYPE_MESSAGE:
+            return Message(client, data)
+
+        return Event(client, data)
 
     def is_hidden(self):
         return 'hidden' in self.data and self.data['hidden']
@@ -57,7 +64,7 @@ class Event:
         return self.type == Event.TYPE_USER_TYPING
 
     def is_plain_message(self):
-        return self.is_message() and self.text
+        return self.is_message() and self.text and not 'subtype' in self.data
 
 
 class Message(Event):
@@ -74,6 +81,9 @@ class Message(Event):
 
     def __init__(self, client, data):
         Event.__init__(self, client, data)
+
+        if self.is_plain_message():
+            self.channel.store_message(self)
 
         self.mentions = {}
 

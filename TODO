@@ -4,12 +4,11 @@
 - say fortunes
 - today at bal
 - repost deleted messages for da luulz
+- swear counter
+
 - Create factory for events, channels, users or use __new__
-- refactors commands into a plugin
-
-
 - general text/response stuff
 - soundcloud
 - diagnostics (uname, ...)
 - wolfram alpha or other counting stuff
-
+- persistence

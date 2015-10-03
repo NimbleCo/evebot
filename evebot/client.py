@@ -139,10 +139,7 @@ class Client:
             if not 'type' in event_data:
                 continue
 
-            if event_data['type'] == Event.TYPE_MESSAGE:
-                event = Message(self, event_data)
-            else:
-                event = Event(self, event_data)
+            event = Event.create(self, event_data)
 
             self.process_special_event(event)
 

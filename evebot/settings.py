@@ -74,6 +74,7 @@ default_config = {
         'ping_interval': 5,
         'thread_sleep_time': 0.01,
         'thread_join_timeout': 1,
+        'channel_message_buffer_size': 200,
     },
     'plugins': {
         'enabled': [

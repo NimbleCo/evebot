@@ -11,7 +11,7 @@ class MockDeletePlugin(Plugin):
     IS_NAUGHTY = True
     SUBSCRIBES_TO = {SubscriberType.msg_deleted}
 
-    probability = 2
+    probability = 10
 
     mock_texts = [
         '<@{user_id}>: You should have left this for posterity!',
@@ -28,7 +28,7 @@ class MockDeletePlugin(Plugin):
             # buffer was not long enough
             return
 
-        if random.randrange(1, self.probability) > 1:
+        if random.randrange(0, self.probability) > 1:
             return
 
         self.send_message(event.channel, random.choice(self.mock_texts).format(
@@ -44,7 +44,7 @@ class MockChangePlugin(Plugin):
     IS_NAUGHTY = True
     SUBSCRIBES_TO = {SubscriberType.msg_changed}
 
-    probability = 3
+    probability = 10
 
     mock_texts = [
         'Did you make a mistake {first_name}?',
@@ -59,7 +59,7 @@ class MockChangePlugin(Plugin):
         if not event.old or not event.is_edited:
             return
 
-        if random.randrange(1, self.probability) > 1:
+        if random.randrange(0, self.probability) > 1:
             return
 
         self.send_message(event.channel, random.choice(self.mock_texts).format(
